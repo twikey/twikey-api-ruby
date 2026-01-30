@@ -63,6 +63,15 @@ module Twikey
       perform_request(uri, request)
     end
 
+    def get_binary(path, params = {})
+      uri = join_url(@base_url, path)
+      uri.query = URI.encode_www_form(params) unless params.empty?
+      request = Net::HTTP::Get.new(uri)
+      request['Authorization'] = authenticate
+      request['Accept'] = 'application/pdf'
+      perform_binary_request(uri, request)
+    end
+
     def post(path, body = {}, form: false)
       uri = join_url(@base_url, path)
       request = Net::HTTP::Post.new(uri)
@@ -119,6 +128,20 @@ module Twikey
       case response
       when Net::HTTPSuccess
         JSON.parse(response.body)
+      else
+        raise Error, "HTTP #{response.code}: #{response.message}\n#{response.body}"
+      end
+    end
+
+    def perform_binary_request(uristr, request)
+      uri = URI.parse(uristr)
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = uri.scheme == 'https'
+      response = http.request(request)
+
+      case response
+      when Net::HTTPSuccess
+        response.body
       else
         raise Error, "HTTP #{response.code}: #{response.message}\n#{response.body}"
       end
@@ -185,6 +208,10 @@ module Twikey
 
     def create_invoice(params)
       @client.post('/invoice', params)
+    end
+
+    def pdf(invoice_id)
+      @client.get_binary("/invoice/#{invoice_id}/pdf")
     end
   end
 
