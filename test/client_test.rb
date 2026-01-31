@@ -99,6 +99,14 @@ class TestTwikeyClient < Minitest::Test
     end
   end
 
+  def test_invoice_pdf
+    skip "Invoice number not defined" unless ENV["INVOICE_NUMBER"]
+
+    pdf_content = @client.invoices.pdf(ENV["INVOICE_NUMBER"])
+    assert pdf_content
+    assert pdf_content.start_with?("%PDF"), "Expected PDF content to start with %PDF"
+  end
+
   def test_tx_feed
     @client.transactions.feed.lazy.each do |tx|
       assert tx
