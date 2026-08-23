@@ -11,6 +11,10 @@ jobs:
 
     runs-on: ubuntu-latest
     strategy:
+      # The tests hit the shared Twikey beta account, whose feed endpoints are
+      # serialised per API key. Running the matrix legs at the same time makes
+      # them fail each other with err_call_in_progress.
+      max-parallel: 1
       matrix:
         ruby-version: ['3.2', '3.3']
 

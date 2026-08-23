@@ -67,7 +67,11 @@ class TestTwikeyClient < Minitest::Test
 
   def test_mandate_sign
     mandate = @client.mandates.sign({
-        "method": "paper",
+        # "paper" requires a template that allows paper signing; the CORE
+        # template used by the SDK test suites is signed by importing an
+        # existing mandate, matching the other Twikey SDKs.
+        "method": "import",
+        "iban": "BE09363107700857",
         "ct": @ct,
         "email":  Faker::Internet.email,
         "firstname":  Faker::Name.first_name,
@@ -84,7 +88,6 @@ class TestTwikeyClient < Minitest::Test
         # "contractNumber": "",
       })
     assert mandate["MndtId"]
-    assert mandate["Pdf"]
   end
 
   def test_mandate_feed
